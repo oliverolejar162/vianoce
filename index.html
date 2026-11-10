@@ -372,7 +372,9 @@ const A18N = {
     st_yes: 'přijde', st_no: 'nepřijde', st_pending: 'čekáme',
     err: 'Něco se nepovedlo: {m}', loading: 'Načítám…', badKey: 'Neplatný odkaz do adminu.',
     funnelTitle: 'Kolik nás bude', fInvited: 'pozvaných', fReplied: 'odpovědělo', fRepliedNote: '{no} z nich nepřijde', fYes: 'přijde', fWaiting: 'neodpovědělo', fNo: 'nepřijde', adultsKids: '{a} dospělých · {k} dětí',
-    estRange: 'jistě {min}, nejvýš {max}', waitNote: '{p} lidí ({n} pozvánek) zatím neodpovědělo.'
+    estRange: 'jistě {min}, nejvýš {max}', waitNote: '{p} lidí ({n} pozvánek) zatím neodpovědělo.',
+    inviteTitle: 'Text pozvánky (můžete upravit)', copyText: 'Kopírovat text',
+    inviteLines: ['Ahoj! 🎄', '', 'Zveme vás na naši vánoční party v sobotu 19. prosince od 18:00, Wittgensteinova 1217/2B, Olomouc.', '', 'Letos žádné dárky. Stačí jedna vánoční koule na stromeček za každého a něco dobrého k jídlu nebo k pití, ideálně něco tradičního od vás z domova.', '', 'Dejte nám prosím vědět, jestli dorazíte, a napište, co přinesete:', '{url}', '', 'Těšíme se na vás!', 'Oliver & Maťka']
   },
   en: {
     title: 'Guest overview', sub: '{d} days to go · Saturday 19 Dec at 6 pm',
@@ -391,7 +393,9 @@ const A18N = {
     st_yes: 'coming', st_no: 'not coming', st_pending: 'waiting',
     err: 'Something went wrong: {m}', loading: 'Loading…', badKey: 'Invalid admin link.',
     funnelTitle: 'Headcount', fInvited: 'invited', fReplied: 'replied', fRepliedNote: '{no} of them not coming', fYes: 'coming', fWaiting: 'no reply yet', fNo: 'not coming', adultsKids: '{a} adults · {k} kids',
-    estRange: 'sure {min}, at most {max}', waitNote: '{p} people ({n} invitations) have not replied yet.'
+    estRange: 'sure {min}, at most {max}', waitNote: '{p} people ({n} invitations) have not replied yet.',
+    inviteTitle: 'Invitation text (you can edit it)', copyText: 'Copy text',
+    inviteLines: ['Hi! 🎄', '', 'We are inviting you to our Christmas party on Saturday 19 December from 6 pm, Wittgensteinova 1217/2B, Olomouc.', '', 'No presents this year. Just bring one Christmas bauble for the tree per person and something good to eat or drink, ideally a traditional dish from home.', '', 'Please let us know if you are coming and what you will bring:', '{url}', '', 'Looking forward to seeing you!', 'Oliver & Maťka']
   }
 };
 
@@ -708,7 +712,10 @@ function renderAdmin() {
         '<select id="newAdults" aria-label="' + esc(ta('thAdults')) + '"><option value="1">' + esc(ta('one')) + '</option><option value="2">' + esc(ta('two')) + '</option></select>' +
         '<button type="submit" class="btn">' + esc(ta('add')) + '</button></form></section>' +
       '<section class="panel"><h3>' + esc(ta('linkTitle')) + '</h3><div class="linkbox"><code id="gUrl">' + esc(A.data.guestUrl) + '</code>' +
-        '<button type="button" class="btn ghost" data-act="copy">' + esc(ta('copy')) + '</button></div></section>' +
+        '<button type="button" class="btn ghost" data-act="copy">' + esc(ta('copy')) + '</button></div>' +
+        '<label class="lbl" for="inviteText">' + esc(ta('inviteTitle')) + '</label>' +
+        '<textarea id="inviteText" rows="9">' + esc((A18N[lang].inviteLines || A18N.cs.inviteLines).join(String.fromCharCode(10)).split('{url}').join(A.data.guestUrl)) + '</textarea>' +
+        '<div><button type="button" class="btn" data-act="copyInvite">' + esc(ta('copyText')) + '</button></div></section>' +
     '</div>' +
     '<section class="panel">' +
       '<div class="toolbar">' + ['all', 'yes', 'pending', 'no'].map(function (f) {
@@ -756,6 +763,11 @@ $('#adminView').addEventListener('click', function (e) {
   else if (act === 'edit') { A.editing = b.dataset.name; renderAdmin(); }
   else if (act === 'cancelEdit') { A.editing = ''; renderAdmin(); }
   else if (act === 'saveNeed') adminCall('setNeed', [$('#need').value], ta('saved'));
+  else if (act === 'copyInvite') {
+    const box = $('#inviteText');
+    const fb = function () { box.focus(); box.select(); };
+    try { navigator.clipboard.writeText(box.value).then(function () { toast(ta('copied')); }, fb); } catch (err) { fb(); }
+  }
   else if (act === 'copy') {
     const text = $('#gUrl').textContent;
     const fallback = function () { const r = document.createRange(); r.selectNodeContents($('#gUrl')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };

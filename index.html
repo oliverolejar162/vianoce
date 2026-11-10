@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Christmas Party RSVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Great+Vibes&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a single invitation card on a snowy pine-night ground, guest wizard steps inside the card; admin uses the same paper on a wider grid. Deliberately one look in both themes. */
+:root {
+  --night: #0e2620;
+  --pine: #1f4536;
+  --paper: #f7f0e3;
+  --paper-2: #efe5d2;
+  --ink: #2b211b;
+  --ink-soft: #6b5d52;
+  --berry: #a3203a;
+  --berry-ink: #fff6ee;
+  --gold: #c9a14a;
+  --moss: #4f7350;
+  --line: rgba(43, 33, 27, .14);
+  --snow: #ffffff;
+  --on-night: #f3ead9;
+  --ok-bg: #e2ecd9;  --ok-fg: #2f5a33;
+  --no-bg: #f5dcdc;  --no-fg: #8d1d31;
+  --wait-bg: #f4e7c7; --wait-fg: #7a5a12;
+  --f-script: "Great Vibes", "Brush Script MT", cursive;
+  --f-head: "Fraunces", Georgia, "Times New Roman", serif;
+  --f-body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--night);
+  background-image: radial-gradient(1100px 620px at 50% -12%, var(--pine), var(--night) 62%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 15px/1.55 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+}
+#snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 580px; margin: 0 auto;
+  padding-block: 18px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap.wide { max-width: 1120px; }
+
+/* top bar */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 34px; color: var(--on-night); }
+.brand { font-family: var(--f-script); font-size: 30px; line-height: 1; color: var(--on-night); }
+.brand small { font-family: var(--f-body); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .7; margin-left: 8px; }
+.lang { display: inline-flex; border: 1px solid rgba(243,234,217,.35); border-radius: 999px; padding: 3px; }
+.lang button { appearance: none; border: 0; background: transparent; color: var(--on-night); font: 600 12px var(--f-body); letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--on-night); color: var(--night); }
+
+.demo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; justify-content: center; margin: -18px 0 22px; color: var(--on-night); font-size: 12px; }
+.demo span { opacity: .75; }
+.demo a { color: var(--on-night); border: 1px dashed rgba(243,234,217,.5); border-radius: 999px; padding: 4px 12px; text-decoration: none; font-weight: 600; }
+.demo a[aria-current="page"] { background: rgba(243,234,217,.16); border-style: solid; }
+
+/* card */
+.card {
+  position: relative; background: var(--paper); border-radius: 22px;
+  padding: 76px 30px 28px;
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.05);
+}
+.card::after { content: ""; position: absolute; inset: 10px; border: 1px solid var(--line); border-radius: 15px; pointer-events: none; }
+#garland { position: absolute; left: -14px; top: -22px; width: calc(100% + 28px); height: 78px; pointer-events: none; }
+.baubles { position: absolute; left: 0; right: 0; top: 30px; display: flex; justify-content: center; gap: 16px; }
+.baubles i { position: relative; width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--gold); background: var(--paper); transition: background .3s, transform .3s; }
+.baubles i::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 1px; height: 9px; background: var(--gold); opacity: .7; }
+.baubles i.done { background: var(--berry); border-color: var(--berry); }
+.baubles i.now { background: var(--gold); transform: scale(1.3); box-shadow: 0 0 0 4px rgba(201,161,74,.22); }
+
+.step { display: grid; gap: 18px; animation: rise .45s ease both; position: relative; z-index: 1; }
+@keyframes rise { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--moss); }
+.center { text-align: center; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h2 { font: 600 30px/1.15 var(--f-head); letter-spacing: -.01em; }
+h3 { font: 600 18px/1.3 var(--f-head); }
+p { margin: 0; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 13px; }
+.script { font-family: var(--f-script); color: var(--berry); font-size: clamp(56px, 15vw, 84px); line-height: .92; font-weight: 400; }
+
+/* invite date block, same layout as the printed invitation */
+.when { display: flex; justify-content: center; align-items: center; gap: 16px; color: var(--berry); font-family: var(--f-head); }
+.when span { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+.when b { font-size: 44px; font-weight: 600; line-height: 1; padding: 0 16px; border-left: 1px solid var(--berry); border-right: 1px solid var(--berry); }
+.place { display: grid; gap: 2px; justify-items: center; }
+.place strong { font: 600 17px var(--f-head); }
+
+/* lists inside steps */
+.bring-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.bring-list li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+.bring-list .ic { width: 28px; height: 28px; border-radius: 50%; background: var(--paper-2); display: grid; place-items: center; font-size: 14px; }
+.nogift { background: var(--paper-2); border-radius: 14px; padding: 16px 18px; display: grid; gap: 6px; }
+.ornament { width: 72px; height: 84px; margin: 0 auto; position: relative; }
+.ornament::before { content: ""; position: absolute; left: 50%; top: 0; width: 16px; height: 12px; transform: translateX(-50%); background: var(--gold); border-radius: 3px; }
+.ornament::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 72px; border-radius: 50%; background: radial-gradient(circle at 34% 30%, #e46a7c 0 8%, var(--berry) 40%, #6e1324 100%); box-shadow: inset 0 -8px 16px rgba(0,0,0,.2); }
+
+/* form controls */
+label.lbl { font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; }
+input[type="text"], input[type="search"], textarea, select {
+  width: 100%; box-sizing: border-box; font: 15px var(--f-body); color: var(--ink);
+  background: #fffaf2; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+}
+textarea { min-height: 92px; resize: vertical; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.names { display: grid; gap: 6px; max-height: 340px; overflow-y: auto; padding: 2px; }
+.name-btn { appearance: none; width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line); background: #fffaf2; border-radius: 12px; padding: 11px 14px; font: 500 15px var(--f-body); color: var(--ink); cursor: pointer; }
+.name-btn:hover { border-color: var(--gold); }
+.name-btn[aria-pressed="true"] { border-color: var(--berry); background: #fbe9e6; }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choice { appearance: none; border: 1.5px solid var(--line); background: #fffaf2; border-radius: 16px; padding: 22px 14px; cursor: pointer; display: grid; gap: 6px; justify-items: center; font: 600 16px var(--f-body); color: var(--ink); }
+.choice .big { font-size: 30px; line-height: 1; }
+.choice:hover { border-color: var(--gold); }
+.choice[aria-pressed="true"] { border-color: var(--berry); background: #fbe9e6; }
+
+.counter { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fffaf2; }
+.counter .stepper { display: inline-flex; align-items: center; gap: 12px; }
+.counter .stepper button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); font: 600 20px var(--f-body); color: var(--ink); cursor: pointer; }
+.counter .stepper output { min-width: 24px; text-align: center; font: 600 22px var(--f-head); font-variant-numeric: tabular-nums; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { appearance: none; border: 1px solid var(--line); background: #fffaf2; border-radius: 999px; padding: 7px 13px; font: 500 13px var(--f-body); color: var(--ink); cursor: pointer; }
+.chip:hover { border-color: var(--gold); }
+
+.others { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding-block: 12px; display: grid; gap: 8px; max-height: 230px; overflow-y: auto; }
+.others .row { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); gap: 12px; font-size: 14px; }
+.others .row b { font-weight: 600; }
+.need { background: #fbf1d7; border: 1px solid #ead7a4; border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+
+.summary { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.summary .row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: 12px; padding-block: 11px; border-bottom: 1px solid var(--line); align-items: start; }
+.summary .k { color: var(--ink-soft); font-size: 13px; }
+.linkbtn { appearance: none; border: 0; background: none; color: var(--berry); font: 600 13px var(--f-body); cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 6px; }
+.btn { appearance: none; border: 0; border-radius: 999px; padding: 13px 24px; font: 700 15px var(--f-body); cursor: pointer; background: var(--berry); color: var(--berry-ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { filter: brightness(1.07); }
+.btn[disabled] { opacity: .55; cursor: progress; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.gold { background: var(--gold); color: var(--ink); }
+.err { color: var(--no-fg); font-weight: 600; font-size: 14px; }
+.spacer { flex: 1; }
+
+/* pills */
+.pill { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.yes { background: var(--ok-bg); color: var(--ok-fg); }
+.pill.no { background: var(--no-bg); color: var(--no-fg); }
+.pill.pending { background: var(--wait-bg); color: var(--wait-fg); }
+
+/* admin */
+.adm-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 24px; color: var(--on-night); margin-bottom: 18px; }
+.adm-head h1 { font: 600 34px/1.1 var(--f-head); }
+.adm-head .script { color: var(--gold); font-size: 44px; }
+.adm-head p { opacity: .78; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat { background: var(--paper); border-radius: 16px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+.stat .n { font: 600 40px/1 var(--f-head); font-variant-numeric: tabular-nums; }
+.stat .l { font-size: 13px; color: var(--ink-soft); }
+.stat.hero { background: var(--berry); color: var(--berry-ink); }
+.stat.hero .l { color: var(--berry-ink); opacity: .85; }
+.stat input[type="range"] { width: 100%; accent-color: var(--berry); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.panel { background: var(--paper); border-radius: 16px; padding: 18px 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.panel h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.panel h3 small { font: 500 13px var(--f-body); color: var(--ink-soft); }
+.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.plain li { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); gap: 12px; padding-block: 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.plain li:last-child { border-bottom: 0; }
+.plain li b { font-weight: 600; }
+.empty { color: var(--ink-soft); font-size: 14px; }
+.addform { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
+.linkbox { display: flex; gap: 8px; align-items: center; }
+.linkbox code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; background: #fffaf2; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 13px; user-select: all; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tab { appearance: none; border: 1px solid var(--line); background: #fffaf2; border-radius: 999px; padding: 7px 13px; font: 600 13px var(--f-body); color: var(--ink); cursor: pointer; }
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.toolbar input { max-width: 240px; padding: 8px 12px; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
+th { text-align: left; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.num { font-variant-numeric: tabular-nums; text-align: center; }
+tr.editing td { background: #fbf3e4; }
+.editgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.editgrid .full { grid-column: 1 / -1; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: 14px; z-index: 20; }
+
+@media (max-width: 480px) {
+  .card { padding: 72px 18px 22px; }
+  h2 { font-size: 26px; }
+  .summary .row { grid-template-columns: 1fr auto; }
+  .summary .row .v { grid-column: 1 / -1; grid-row: 2; }
+  .addform { grid-template-columns: 1fr 1fr; }
+  .addform input { grid-column: 1 / -1; }
+  .baubles { gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step { animation: none; }
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="wrap" id="wrap">
+  <div class="topbar">
+    <div class="brand">Christmas Party<small>2026</small></div>
+    <div class="lang" role="group" aria-label="Jazyk / Language">
+      <button type="button" data-lang="cs" aria-pressed="true">CZ</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+  <nav class="demo" id="demo" hidden>
+    <span id="demoNote">Ukázka · změny se neukládají</span>
+    <a href="#host" id="demoHost">Pohled hosta</a>
+    <a href="#admin" id="demoAdmin">Admin</a>
+  </nav>
+  <main id="guestView">
+    <section class="card">
+      <canvas id="garland" aria-hidden="true"></canvas>
+      <div class="baubles" id="baubles" aria-hidden="true"></div>
+      <div id="stepHost"></div>
+    </section>
+  </main>
+  <main id="adminView" hidden></main>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ------------------------------------------------------------------ texts */
+const I18N = {
+  cs: {
+    inviteEyebrow: 'Vaši oblíbení Slováci vás zvou na',
+    month: 'prosinec', day: 'sobota',
+    placeNote: 'Podle počtu hostů to bude u nás, nebo někde poblíž. Dáme vědět.',
+    start: 'Odpovědět na pozvánku', next: 'Pokračovat', back: 'Zpět',
+    giftsEyebrow: 'Jedno pravidlo', giftsTitle: 'Letos žádné dárky',
+    giftsText: 'Tahle oslava je o lidech a o tom, že se máme rádi. Místo dárků přineste každý jednu vánoční kouli na stromeček. Na konci večera bude stromeček jen z vašich ozdob.',
+    giftsJoke: 'Kdo přinese dárek, dostane slovenský výprask vařečkou. A platí to i pro šikuly, kteří loni dárky rozdávali mimo party.',
+    takeTitle: 'Co si vzít s sebou',
+    take1: 'Jednu vánoční kouli za každého z vás',
+    take2: 'Něco k jídlu, ideálně tradičního od vás z domova (napíšete za chvíli)',
+    take3: 'Něco k pití, co máte rádi',
+    take4: 'Pohodlné oblečení, cokoliv, v čem se cítíte dobře',
+    whoEyebrow: 'Krok 1', whoTitle: 'Kdo jste?', whoSearch: 'Najděte své jméno',
+    whoLoading: 'Načítám seznam hostů…', whoNone: 'Nikdo takový v seznamu není.',
+    whoMissing: 'Nejste v seznamu? Napište Oliverovi nebo Maťce a přidáme vás.',
+    whoErr: 'Vyberte své jméno ze seznamu.',
+    st_yes: 'přijde', st_no: 'nepřijde', st_pending: 'zatím neodpověděl/a',
+    already: 'Už jste odpověděli. Můžete svou odpověď upravit.',
+    rsvpEyebrow: 'Krok 2', rsvpTitle: '{name}, dorazíte?',
+    rsvpYes: 'Ano, přijdu', rsvpNo: 'Bohužel ne', rsvpErr: 'Dejte nám vědět, jestli přijdete.',
+    countEyebrow: 'Krok 3', countTitle: 'Kolik vás bude?',
+    adults: 'Dospělí', adultsHint: 'včetně vás', kids: 'Děti', kidsHint: 'pokud je berete',
+    bringEyebrow: 'Krok 4', bringTitle: 'Co donesete?',
+    bringText: 'Místo dárků každý přinese něco k jídlu nebo k pití. Podívejte se, co už plánují ostatní, ať nemáme šest bábovek.',
+    bringOthers: 'Zatím se chystá', bringNobody: 'Zatím nikdo nic nenapsal. Buďte první.',
+    bringNeed: 'Ještě by se hodilo:', bringLabel: 'Já donesu', bringPh: 'Např. bryndzové halušky a domácí slivovice',
+    bringErr: 'Napište, co přinesete. Klidně i jen přibližně.',
+    bringChips: ['Tradiční jídlo z domova', 'Cukroví', 'Chlebíčky', 'Slaný snack', 'Salát', 'Víno', 'Pivo', 'Nealko', 'Svařák / punč'],
+    dietEyebrow: 'Krok 5', dietTitle: 'Alergie nebo dieta?',
+    dietText: 'Ať víme, na co si dát pozor. Pokud jíte všechno, nechte pole prázdné.',
+    dietLabel: 'Alergie, intolerance, dieta', dietPh: 'Např. bez lepku, vegetarián',
+    dietChips: ['Bez lepku', 'Vegetarián', 'Vegan', 'Bez laktózy', 'Alergie na ořechy'],
+    sumEyebrow: 'Skoro hotovo', sumTitle: 'Zkontrolujte odpověď',
+    sumName: 'Jméno', sumRsvp: 'Účast', sumPeople: 'Počet', sumBring: 'Donese', sumDiet: 'Dieta',
+    sumPeopleVal: '{a} dosp. + {k} dětí', none: 'nic', edit: 'Upravit',
+    send: 'Odeslat odpověď', sending: 'Odesílám…', sendErr: 'Odpověď se nepodařilo odeslat. Zkuste to prosím znovu.',
+    doneYesTitle: 'Těšíme se na vás!', doneYesText: 'Odpověď máme. 19. prosince v 18:00 se vidíme. Nezapomeňte na vánoční kouli.',
+    doneNoTitle: 'Škoda, budete nám chybět', doneNoText: 'Díky, že jste dali vědět. Kdyby se něco změnilo, odpověď můžete kdykoliv upravit.',
+    calendar: 'Přidat do kalendáře', changeAnswer: 'Upravit odpověď',
+    signoff: 'Tešíme sa na vás, šmolkovia!',
+    demoNote: 'Ukázka · změny se neukládají', demoHost: 'Pohled hosta', demoAdmin: 'Admin'
+  },
+  en: {
+    inviteEyebrow: 'Your favourite Slovaks invite you to',
+    month: 'December', day: 'Saturday',
+    placeNote: 'Depending on numbers it will be at our place or somewhere nearby. We will let you know.',
+    start: 'Reply to the invitation', next: 'Continue', back: 'Back',
+    giftsEyebrow: 'One rule', giftsTitle: 'No presents this year',
+    giftsText: 'This party is about people and about liking each other. Instead of presents, everyone brings one Christmas bauble for the tree. By the end of the night the tree will be decorated only with yours.',
+    giftsJoke: 'Anyone who brings a present gets a traditional Slovak spanking with a wooden spoon. That includes the clever ones who handed out gifts outside the party last year.',
+    takeTitle: 'What to bring',
+    take1: 'One Christmas bauble per person',
+    take2: 'Something to eat, ideally a traditional dish from home (you will tell us in a moment)',
+    take3: 'Something to drink that you enjoy',
+    take4: 'Comfy clothes, whatever you feel good in',
+    whoEyebrow: 'Step 1', whoTitle: 'Who are you?', whoSearch: 'Find your name',
+    whoLoading: 'Loading the guest list…', whoNone: 'No one by that name on the list.',
+    whoMissing: 'Not on the list? Message Oliver or Maťka and we will add you.',
+    whoErr: 'Pick your name from the list.',
+    st_yes: 'coming', st_no: 'not coming', st_pending: 'no reply yet',
+    already: 'You already replied. You can change your answer.',
+    rsvpEyebrow: 'Step 2', rsvpTitle: '{name}, can you make it?',
+    rsvpYes: 'Yes, I am coming', rsvpNo: 'Sadly not', rsvpErr: 'Let us know whether you are coming.',
+    countEyebrow: 'Step 3', countTitle: 'How many of you?',
+    adults: 'Adults', adultsHint: 'including you', kids: 'Kids', kidsHint: 'if you bring them',
+    bringEyebrow: 'Step 4', bringTitle: 'What will you bring?',
+    bringText: 'Instead of presents, everyone brings something to eat or drink. Check what others are planning so we do not end up with six identical cakes.',
+    bringOthers: 'Already planned', bringNobody: 'Nobody has written anything yet. Be the first.',
+    bringNeed: 'We could still use:', bringLabel: 'I will bring', bringPh: 'E.g. homemade pierogi and a bottle of red',
+    bringErr: 'Tell us what you will bring. A rough idea is fine.',
+    bringChips: ['Traditional dish from home', 'Christmas cookies', 'Open sandwiches', 'Salty snacks', 'Salad', 'Wine', 'Beer', 'Soft drinks', 'Mulled wine / punch'],
+    dietEyebrow: 'Step 5', dietTitle: 'Allergies or diet?',
+    dietText: 'So we know what to watch out for. If you eat everything, leave it empty.',
+    dietLabel: 'Allergies, intolerances, diet', dietPh: 'E.g. gluten free, vegetarian',
+    dietChips: ['Gluten free', 'Vegetarian', 'Vegan', 'Lactose free', 'Nut allergy'],
+    sumEyebrow: 'Almost done', sumTitle: 'Check your reply',
+    sumName: 'Name', sumRsvp: 'Attending', sumPeople: 'Guests', sumBring: 'Bringing', sumDiet: 'Diet',
+    sumPeopleVal: '{a} adults + {k} kids', none: 'nothing', edit: 'Edit',
+    send: 'Send reply', sending: 'Sending…', sendErr: 'Could not send your reply. Please try again.',
+    doneYesTitle: 'See you there!', doneYesText: 'Got it. See you on 19 December at 6 pm. Do not forget your bauble.',
+    doneNoTitle: 'Sorry you cannot make it', doneNoText: 'Thanks for letting us know. If plans change, you can update your reply any time.',
+    calendar: 'Add to calendar', changeAnswer: 'Change my reply',
+    signoff: 'Tešíme sa na vás, šmolkovia!',
+    demoNote: 'Preview · changes are not saved', demoHost: 'Guest view', demoAdmin: 'Admin'
+  }
+};
+const A18N = {
+  cs: {
+    title: 'Přehled hostů', sub: 'Do večírku zbývá {d} dní · sobota 19. 12. v 18:00',
+    confirmed: 'lidí potvrzeno', kidsOf: 'z toho {k} dětí', declined: 'odpovědí nepřijde',
+    pending: 'čeká na odpověď', estimate: 'odhad celkem', estHint: '{p} % z neodpovězených řekne ano',
+    maxPossible: 'max. možný počet', invited: 'pozvaných (záznamů)',
+    bringTitle: 'Kdo co nese', bringNone: 'Zatím nikdo nic nenapsal.',
+    needTitle: 'Co ještě chybí', needHint: 'Uvidí to hosté v kroku „Co donesete“.', needPh: 'Např. nealko, chleba, něco sladkého bez lepku', save: 'Uložit',
+    dietTitle: 'Alergie a diety', dietNone: 'Nikdo nic nehlásí.',
+    addTitle: 'Přidat hosta', addPh: 'Jméno, např. Jana & Petr', one: '1 osoba', two: '2 osoby', add: 'Přidat',
+    linkTitle: 'Odkaz pro hosty', copy: 'Kopírovat', copied: 'Zkopírováno',
+    all: 'Všichni', yes: 'Přijdou', no: 'Nepřijdou', wait: 'Čekáme',
+    search: 'Hledat jméno',
+    thName: 'Jméno', thStatus: 'Stav', thAdults: 'Dosp.', thKids: 'Děti', thBring: 'Donese', thDiet: 'Dieta', thUpd: 'Změna',
+    edit: 'Upravit', cancel: 'Zrušit', status: 'Stav', saved: 'Uloženo', added: 'Host přidán',
+    st_yes: 'přijde', st_no: 'nepřijde', st_pending: 'čekáme',
+    err: 'Něco se nepovedlo: {m}', loading: 'Načítám…', badKey: 'Neplatný odkaz do adminu.'
+  },
+  en: {
+    title: 'Guest overview', sub: '{d} days to go · Saturday 19 Dec at 6 pm',
+    confirmed: 'people confirmed', kidsOf: 'incl. {k} kids', declined: 'replies not coming',
+    pending: 'awaiting reply', estimate: 'estimated total', estHint: '{p} % of non-replies say yes',
+    maxPossible: 'max. possible', invited: 'invited (entries)',
+    bringTitle: 'Who brings what', bringNone: 'Nobody has written anything yet.',
+    needTitle: 'Still missing', needHint: 'Guests see this in the “What will you bring” step.', needPh: 'E.g. soft drinks, bread, a gluten-free dessert', save: 'Save',
+    dietTitle: 'Allergies and diets', dietNone: 'Nobody reported anything.',
+    addTitle: 'Add a guest', addPh: 'Name, e.g. Jana & Petr', one: '1 person', two: '2 people', add: 'Add',
+    linkTitle: 'Guest link', copy: 'Copy', copied: 'Copied',
+    all: 'All', yes: 'Coming', no: 'Not coming', wait: 'Waiting',
+    search: 'Search name',
+    thName: 'Name', thStatus: 'Status', thAdults: 'Adults', thKids: 'Kids', thBring: 'Bringing', thDiet: 'Diet', thUpd: 'Updated',
+    edit: 'Edit', cancel: 'Cancel', status: 'Status', saved: 'Saved', added: 'Guest added',
+    st_yes: 'coming', st_no: 'not coming', st_pending: 'waiting',
+    err: 'Something went wrong: {m}', loading: 'Loading…', badKey: 'Invalid admin link.'
+  }
+};
+
+/* ------------------------------------------------------------- data layer */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxTyegbwbRI4T-DMaN1OAfMqEhvQFiHp17izpAOlmGsM1sP9nH4IyiLUj8k1rlHZ56TYw/exec';
+const LIVE = !!(window.google && google.script && google.script.run);
+
+const SEED = [];
+const Demo = (function () {
+  const rows = SEED.map(function (r) {
+    return { name: r[0], status: r[1] ? 'yes' : (r[2] ? 'no' : 'pending'), adults: r[4] ? 2 : 1, kids: parseInt(r[5], 10) || 0, kidsRaw: r[5], bring: r[3], diet: r[6], updated: '' };
+  });
+  let need = '';
+  const copy = function (x) { return JSON.parse(JSON.stringify(x)); };
+  const find = function (n) { const g = rows.find(function (r) { return r.name === n; }); if (!g) throw new Error('Jméno v seznamu není.'); return g; };
+  const pub = function () { return copy({ guests: rows.map(function (g) { return { name: g.name, status: g.status, adults: g.adults, kids: g.kids, bring: g.status === 'no' ? '' : g.bring }; }), need: need }); };
+  const adm = function () { return copy({ guests: rows, need: need, guestUrl: 'https://script.google.com/macros/s/…/exec' }); };
+  const write = function (p) { const g = find(p.name); Object.assign(g, { status: p.status, adults: +p.adults || 1, kids: +p.kids || 0, kidsRaw: (+p.kids || '') + '', bring: p.bring || '', diet: p.diet || '', updated: new Date().toISOString() }); };
+  return {
+    getPublicData: pub,
+    getMyRsvp: function (n) { const g = find(n); return copy(g); },
+    submitRsvp: function (p) { write(p); return pub(); },
+    getAdminData: function () { return adm(); },
+    adminUpdate: function (k, p) { write(p); return adm(); },
+    setNeed: function (k, t) { need = t; return adm(); },
+    addGuest: function (k, n, a) {
+      n = String(n || '').trim();
+      if (!n) throw new Error('Zadejte jméno.');
+      if (rows.some(function (r) { return r.name.toLowerCase() === n.toLowerCase(); })) throw new Error('"' + n + '" už v seznamu je.');
+      rows.push({ name: n, status: 'pending', adults: +a >= 2 ? 2 : 1, kids: 0, kidsRaw: '', bring: '', diet: '', updated: '' });
+      return adm();
+    }
+  };
+})();
+
+function call(fn) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  if (API_URL) {
+    return fetch(API_URL, { method: 'POST', redirect: 'follow', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) { if (!j.ok) throw new Error(j.error || 'Chyba'); return j.data; });
+  }
+  if (!LIVE) return new Promise(function (res, rej) { setTimeout(function () { try { res(Demo[fn].apply(null, args)); } catch (e) { rej(e); } }, 250); });
+  return new Promise(function (res, rej) {
+    const r = google.script.run.withSuccessHandler(res).withFailureHandler(rej);
+    r[fn].apply(r, args);
+  });
+}
+
+/* ---------------------------------------------------------------- helpers */
+const $ = function (s, el) { return (el || document).querySelector(s); };
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function fill(s, v) { Object.keys(v || {}).forEach(function (k) { s = s.split('{' + k + '}').join(v[k]); }); return s; }
+let lang = 'cs';
+try { const l = localStorage.getItem('rsvp-lang'); if (l === 'en' || l === 'cs') lang = l; } catch (e) {}
+function t(k, v) { const s = (I18N[lang][k] != null ? I18N[lang][k] : I18N.cs[k]); return typeof s === 'string' ? fill(s, v) : s; }
+function ta(k, v) { return fill(A18N[lang][k] != null ? A18N[lang][k] : A18N.cs[k], v); }
+function people(g) { return (g.adults || 1) + (g.kids || 0); }
+let toastTimer;
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 2200); }
+function appendChip(id, text) {
+  const el = document.getElementById(id); if (!el) return;
+  const cur = el.value.trim();
+  if (cur.toLowerCase().indexOf(text.toLowerCase()) >= 0) return;
+  el.value = cur ? cur + ', ' + text : text;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.focus();
+}
+
+/* ----------------------------------------------------------------- guest */
+const STEPS = ['invite', 'gifts', 'who', 'rsvp', 'count', 'bring', 'diet', 'summary', 'done'];
+const G = { step: 'invite', guests: null, need: '', q: '', me: '', prev: null, err: '', sending: false,
+  d: { status: '', adults: 1, kids: 0, bring: '', diet: '' } };
+
+function loadPublic() {
+  return call('getPublicData').then(function (r) { G.guests = r.guests; G.need = r.need; if (G.step === 'who' || G.step === 'bring') renderGuest(); })
+    .catch(function () { G.guests = G.guests || []; });
+}
+function go(step) { G.err = ''; G.step = step; renderGuest(); const c = $('.card'); if (c && c.getBoundingClientRect().top < 0) c.scrollIntoView({ behavior: 'smooth' }); }
+function flow() { return G.d.status === 'no' ? ['invite', 'gifts', 'who', 'rsvp', 'summary', 'done'] : STEPS; }
+function nextStep() { const f = flow(); go(f[Math.min(f.indexOf(G.step) + 1, f.length - 1)]); }
+function prevStep() { const f = flow(); go(f[Math.max(f.indexOf(G.step) - 1, 0)]); }
+
+function navHtml(nextLabel) {
+  const back = G.step === 'invite' ? '<span></span>' : '<button type="button" class="btn ghost" data-act="back">' + esc(t('back')) + '</button>';
+  return (G.err ? '<p class="err" role="alert">' + esc(G.err) + '</p>' : '') +
+    '<div class="nav">' + back + '<button type="button" class="btn" data-act="next">' + esc(nextLabel || t('next')) + '</button></div>';
+}
+
+function nameListHtml() {
+  if (!G.guests) return '<p class="muted">' + esc(t('whoLoading')) + '</p>';
+  const q = G.q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const list = G.guests.filter(function (g) { return !q || g.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').indexOf(q) >= 0; });
+  if (!list.length) return '<p class="muted">' + esc(t('whoNone')) + '</p>';
+  return list.map(function (g) {
+    return '<button type="button" class="name-btn" data-act="pick" data-name="' + esc(g.name) + '" aria-pressed="' + (g.name === G.me) + '"><span>' + esc(g.name) + '</span>' +
+      (g.status !== 'pending' ? '<span class="pill ' + g.status + '">' + esc(t('st_' + g.status)) + '</span>' : '') + '</button>';
+  }).join('');
+}
+
+function stepHtml() {
+  const d = G.d;
+  switch (G.step) {
+    case 'invite': return '<div class="step center">' +
+      '<p class="eyebrow">' + esc(t('inviteEyebrow')) + '</p>' +
+      '<h1 class="script">Christmas<br>Party</h1>' +
+      '<div class="when"><span>' + esc(t('month')) + '</span><b>19</b><span>18:00</span></div>' +
+      '<div class="place"><strong>Wittgensteinova 1217/2B</strong><span>Olomouc · ' + esc(t('day')) + '</span></div>' +
+      '<p class="muted small">' + esc(t('placeNote')) + '</p>' +
+      '<div class="nav" style="justify-content:center"><button type="button" class="btn" data-act="next">' + esc(t('start')) + '</button></div></div>';
+    case 'gifts': return '<div class="step">' +
+      '<div class="ornament" aria-hidden="true"></div>' +
+      '<p class="eyebrow center">' + esc(t('giftsEyebrow')) + '</p><h2 class="center">' + esc(t('giftsTitle')) + '</h2>' +
+      '<p>' + esc(t('giftsText')) + '</p>' +
+      '<div class="nogift"><h3>' + esc(t('takeTitle')) + '</h3><ul class="bring-list">' +
+        ['🎄', '🍲', '🍷', '🧦'].map(function (ic, i) { return '<li><span class="ic" aria-hidden="true">' + ic + '</span><span>' + esc(t('take' + (i + 1))) + '</span></li>'; }).join('') +
+      '</ul></div>' +
+      '<p class="muted small">' + esc(t('giftsJoke')) + '</p>' + navHtml() + '</div>';
+    case 'who': return '<div class="step">' +
+      '<p class="eyebrow">' + esc(t('whoEyebrow')) + '</p><h2>' + esc(t('whoTitle')) + '</h2>' +
+      '<div><label class="lbl" for="q">' + esc(t('whoSearch')) + '</label><input type="search" id="q" autocomplete="off" value="' + esc(G.q) + '"></div>' +
+      '<div class="names" id="names">' + nameListHtml() + '</div>' +
+      '<p class="muted small">' + esc(t('whoMissing')) + '</p>' + navHtml() + '</div>';
+    case 'rsvp': return '<div class="step">' +
+      '<p class="eyebrow">' + esc(t('rsvpEyebrow')) + '</p><h2>' + esc(t('rsvpTitle', { name: G.me })) + '</h2>' +
+      (G.prev && G.prev.status !== 'pending' ? '<p class="muted small">' + esc(t('already')) + '</p>' : '') +
+      '<div class="choices">' +
+        '<button type="button" class="choice" data-act="status" data-v="yes" aria-pressed="' + (d.status === 'yes') + '"><span class="big" aria-hidden="true">🥂</span>' + esc(t('rsvpYes')) + '</button>' +
+        '<button type="button" class="choice" data-act="status" data-v="no" aria-pressed="' + (d.status === 'no') + '"><span class="big" aria-hidden="true">🕯️</span>' + esc(t('rsvpNo')) + '</button>' +
+      '</div>' + navHtml() + '</div>';
+    case 'count': return '<div class="step">' +
+      '<p class="eyebrow">' + esc(t('countEyebrow')) + '</p><h2>' + esc(t('countTitle')) + '</h2>' +
+      counterHtml('adults', d.adults) + counterHtml('kids', d.kids) + navHtml() + '</div>';
+    case 'bring': {
+      const others = (G.guests || []).filter(function (g) { return g.name !== G.me && g.bring && g.status !== 'no'; });
+      return '<div class="step">' +
+        '<p class="eyebrow">' + esc(t('bringEyebrow')) + '</p><h2>' + esc(t('bringTitle')) + '</h2>' +
+        '<p class="muted">' + esc(t('bringText')) + '</p>' +
+        '<div><h3 style="margin-bottom:8px">' + esc(t('bringOthers')) + '</h3><div class="others">' +
+          (others.length ? others.map(function (g) { return '<div class="row"><b>' + esc(g.name) + '</b><span>' + esc(g.bring) + '</span></div>'; }).join('') : '<p class="muted small">' + esc(t('bringNobody')) + '</p>') +
+        '</div></div>' +
+        (G.need ? '<div class="need"><b>' + esc(t('bringNeed')) + '</b> ' + esc(G.need) + '</div>' : '') +
+        '<div><label class="lbl" for="bring">' + esc(t('bringLabel')) + '</label><textarea id="bring" placeholder="' + esc(t('bringPh')) + '">' + esc(d.bring) + '</textarea></div>' +
+        '<div class="chips">' + t('bringChips').map(function (c) { return '<button type="button" class="chip" data-act="chip" data-target="bring" data-v="' + esc(c) + '">+ ' + esc(c) + '</button>'; }).join('') + '</div>' +
+        navHtml() + '</div>';
+    }
+    case 'diet': return '<div class="step">' +
+      '<p class="eyebrow">' + esc(t('dietEyebrow')) + '</p><h2>' + esc(t('dietTitle')) + '</h2>' +
+      '<p class="muted">' + esc(t('dietText')) + '</p>' +
+      '<div><label class="lbl" for="diet">' + esc(t('dietLabel')) + '</label><textarea id="diet" placeholder="' + esc(t('dietPh')) + '">' + esc(d.diet) + '</textarea></div>' +
+      '<div class="chips">' + t('dietChips').map(function (c) { return '<button type="button" class="chip" data-act="chip" data-target="diet" data-v="' + esc(c) + '">+ ' + esc(c) + '</button>'; }).join('') + '</div>' +
+      navHtml() + '</div>';
+    case 'summary': {
+      const yes = d.status === 'yes';
+      const row = function (k, v, step) { return '<div class="row"><span class="k">' + esc(t(k)) + '</span><span class="v">' + v + '</span>' + (step ? '<button type="button" class="linkbtn" data-act="goto" data-v="' + step + '">' + esc(t('edit')) + '</button>' : '<span></span>') + '</div>'; };
+      return '<div class="step">' +
+        '<p class="eyebrow">' + esc(t('sumEyebrow')) + '</p><h2>' + esc(t('sumTitle')) + '</h2>' +
+        '<div class="summary">' +
+          row('sumName', esc(G.me), 'who') +
+          row('sumRsvp', '<span class="pill ' + d.status + '">' + esc(t('st_' + d.status)) + '</span>', 'rsvp') +
+          (yes ? row('sumPeople', esc(t('sumPeopleVal', { a: d.adults, k: d.kids })), 'count') +
+                 row('sumBring', esc(d.bring || t('none')), 'bring') +
+                 row('sumDiet', esc(d.diet || '–'), 'diet') : '') +
+        '</div>' +
+        (G.err ? '<p class="err" role="alert">' + esc(G.err) + '</p>' : '') +
+        '<div class="nav"><button type="button" class="btn ghost" data-act="back">' + esc(t('back')) + '</button>' +
+        '<button type="button" class="btn" data-act="send"' + (G.sending ? ' disabled' : '') + '>' + esc(G.sending ? t('sending') : t('send')) + '</button></div></div>';
+    }
+    case 'done': {
+      const yes = d.status === 'yes';
+      const cal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Christmas Party') +
+        '&dates=20261219T170000Z/20261219T230000Z&location=' + encodeURIComponent('Wittgensteinova 1217/2B, Olomouc') +
+        '&details=' + encodeURIComponent(t('take1') + '. ' + (d.bring ? t('sumBring') + ': ' + d.bring : ''));
+      return '<div class="step center">' +
+        (yes ? '<div class="ornament" aria-hidden="true"></div>' : '') +
+        '<h2>' + esc(t(yes ? 'doneYesTitle' : 'doneNoTitle')) + '</h2>' +
+        '<p class="muted">' + esc(t(yes ? 'doneYesText' : 'doneNoText')) + '</p>' +
+        '<div class="nav" style="justify-content:center;flex-wrap:wrap">' +
+          (yes ? '<a class="btn gold" href="' + cal + '" target="_blank" rel="noopener">' + esc(t('calendar')) + '</a>' : '') +
+          '<button type="button" class="btn ghost" data-act="goto" data-v="rsvp">' + esc(t('changeAnswer')) + '</button></div>' +
+        '<p class="script" style="font-size:38px">' + esc(t('signoff')) + '</p></div>';
+    }
+  }
+  return '';
+}
+function counterHtml(key, val) {
+  return '<div class="counter"><div><b>' + esc(t(key)) + '</b><br><span class="muted small">' + esc(t(key + 'Hint')) + '</span></div>' +
+    '<div class="stepper"><button type="button" data-act="dec" data-v="' + key + '" aria-label="−">−</button><output aria-live="polite">' + val + '</output>' +
+    '<button type="button" data-act="inc" data-v="' + key + '" aria-label="+">+</button></div></div>';
+}
+function renderBaubles() {
+  const f = flow().filter(function (s) { return s !== 'done'; });
+  const i = f.indexOf(G.step);
+  $('#baubles').innerHTML = f.map(function (s, k) { return '<i class="' + (G.step === 'done' || k < i ? 'done' : (k === i ? 'now' : '')) + '"></i>'; }).join('');
+}
+function renderGuest() {
+  $('#stepHost').innerHTML = stepHtml();
+  renderBaubles();
+  drawGarland();
+}
+
+function validate() {
+  const d = G.d;
+  if (G.step === 'who' && !G.me) return t('whoErr');
+  if (G.step === 'rsvp' && !d.status) return t('rsvpErr');
+  if (G.step === 'bring' && !d.bring.trim()) return t('bringErr');
+  return '';
+}
+function pick(name) {
+  G.me = name; G.prev = null;
+  G.d = { status: '', adults: 1, kids: 0, bring: '', diet: '' };
+  const g = (G.guests || []).find(function (x) { return x.name === name; });
+  if (g) G.d.adults = g.adults;
+  const list = $('#names'); if (list) list.innerHTML = nameListHtml();
+  call('getMyRsvp', name).then(function (r) {
+    if (G.me !== name) return;
+    G.prev = r;
+    G.d = { status: r.status === 'pending' ? '' : r.status, adults: r.adults || 1, kids: r.kids || 0, bring: r.bring || '', diet: r.diet || '' };
+  }).catch(function () {});
+}
+function send() {
+  G.sending = true; G.err = ''; renderGuest();
+  const d = G.d;
+  call('submitRsvp', { name: G.me, status: d.status, adults: d.adults, kids: d.status === 'yes' ? d.kids : 0, bring: d.status === 'yes' ? d.bring : '', diet: d.status === 'yes' ? d.diet : '' })
+    .then(function (r) { G.sending = false; G.guests = r.guests; G.need = r.need; go('done'); })
+    .catch(function () { G.sending = false; G.err = t('sendErr'); renderGuest(); });
+}
+
+$('#stepHost').addEventListener('click', function (e) {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, v = b.dataset.v;
+  if (act === 'next') { const err = validate(); if (err) { G.err = err; renderGuest(); return; } nextStep(); }
+  else if (act === 'back') prevStep();
+  else if (act === 'pick') { pick(b.dataset.name); G.err = ''; }
+  else if (act === 'status') { G.d.status = v; G.err = ''; renderGuest(); setTimeout(nextStep, 220); }
+  else if (act === 'inc' || act === 'dec') {
+    const max = v === 'adults' ? 6 : 8, min = v === 'adults' ? 1 : 0;
+    G.d[v] = Math.min(max, Math.max(min, G.d[v] + (act === 'inc' ? 1 : -1)));
+    b.parentNode.querySelector('output').textContent = G.d[v];
+  }
+  else if (act === 'chip') appendChip(b.dataset.target, v);
+  else if (act === 'goto') go(v);
+  else if (act === 'send') send();
+});
+$('#stepHost').addEventListener('input', function (e) {
+  if (e.target.id === 'q') { G.q = e.target.value; $('#names').innerHTML = nameListHtml(); }
+  if (e.target.id === 'bring') G.d.bring = e.target.value;
+  if (e.target.id === 'diet') G.d.diet = e.target.value;
+});
+
+/* ----------------------------------------------------------------- admin */
+const A = { key: '', data: null, filter: 'all', q: '', est: 30, editing: '', err: '' };
+try { const p = parseInt(localStorage.getItem('rsvp-est'), 10); if (p >= 0 && p <= 100) A.est = p; } catch (e) {}
+
+function fixUrl(r) { if (API_URL && r) r.guestUrl = location.origin + location.pathname; return r; }
+function loadAdmin() {
+  return call('getAdminData', A.key).then(function (r) { A.data = fixUrl(r); A.err = ''; renderAdmin(); })
+    .catch(function (e) { A.err = ta('badKey') + ' ' + (e && e.message ? e.message : ''); renderAdmin(); });
+}
+function daysLeft() { const now = new Date(); const ev = new Date(2026, 11, 19); return Math.max(0, Math.ceil((ev - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000)); }
+function fmtDate(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'en-GB', { day: 'numeric', month: 'numeric' }) + ' ' + d.toLocaleTimeString(lang === 'cs' ? 'cs-CZ' : 'en-GB', { hour: '2-digit', minute: '2-digit' }); }
+
+function renderAdmin() {
+  const host = $('#adminView');
+  if (A.err && !A.data) { host.innerHTML = '<div class="panel"><p class="err">' + esc(A.err) + '</p></div>'; return; }
+  if (!A.data) { host.innerHTML = '<div class="panel"><p class="muted">' + esc(ta('loading')) + '</p></div>'; return; }
+  const gs = A.data.guests;
+  const yes = gs.filter(function (g) { return g.status === 'yes'; });
+  const no = gs.filter(function (g) { return g.status === 'no'; });
+  const wait = gs.filter(function (g) { return g.status === 'pending'; });
+  const sum = function (arr, f) { return arr.reduce(function (s, g) { return s + f(g); }, 0); };
+  const yesPeople = sum(yes, people), yesKids = sum(yes, function (g) { return g.kids || 0; });
+  const waitPeople = sum(wait, people);
+  const est = yesPeople + Math.round(waitPeople * A.est / 100);
+  const brings = yes.concat(wait).filter(function (g) { return g.bring; });
+  const diets = gs.filter(function (g) { return g.diet && g.status !== 'no'; });
+
+  const q = A.q.trim().toLowerCase();
+  const rows = gs.filter(function (g) {
+    return (A.filter === 'all' || g.status === A.filter) && (!q || g.name.toLowerCase().indexOf(q) >= 0);
+  });
+
+  host.innerHTML =
+    '<div class="adm-head"><div><p class="script">Christmas Party</p><h1>' + esc(ta('title')) + '</h1><p>' + esc(ta('sub', { d: daysLeft() })) + '</p></div></div>' +
+    (A.err ? '<div class="panel" style="margin-bottom:16px"><p class="err">' + esc(A.err) + '</p></div>' : '') +
+    '<div class="stats">' +
+      '<div class="stat hero"><span class="n">' + yesPeople + '</span><span class="l">' + esc(ta('confirmed')) + '<br>' + esc(ta('kidsOf', { k: yesKids })) + '</span></div>' +
+      '<div class="stat"><span class="n">' + est + '</span><span class="l">' + esc(ta('estimate')) + '</span>' +
+        '<input type="range" id="est" min="0" max="100" step="5" value="' + A.est + '" aria-label="' + esc(ta('estHint', { p: A.est })) + '"><span class="l small" id="estLbl">' + esc(ta('estHint', { p: A.est })) + '</span></div>' +
+      '<div class="stat"><span class="n">' + wait.length + '</span><span class="l">' + esc(ta('pending')) + ' (' + waitPeople + ' os.)</span></div>' +
+      '<div class="stat"><span class="n">' + no.length + '</span><span class="l">' + esc(ta('declined')) + '</span></div>' +
+      '<div class="stat"><span class="n">' + (yesPeople + waitPeople) + '</span><span class="l">' + esc(ta('maxPossible')) + '<br>' + gs.length + ' ' + esc(ta('invited')) + '</span></div>' +
+    '</div>' +
+    '<div class="grid2">' +
+      '<section class="panel"><h3>' + esc(ta('bringTitle')) + '<small>' + brings.length + '</small></h3>' +
+        (brings.length ? '<ul class="plain">' + brings.map(function (g) { return '<li><b>' + esc(g.name) + '</b><span>' + esc(g.bring) + '</span></li>'; }).join('') + '</ul>' : '<p class="empty">' + esc(ta('bringNone')) + '</p>') +
+      '</section>' +
+      '<section class="panel"><h3>' + esc(ta('needTitle')) + '</h3><p class="muted small">' + esc(ta('needHint')) + '</p>' +
+        '<textarea id="need" placeholder="' + esc(ta('needPh')) + '">' + esc(A.data.need) + '</textarea>' +
+        '<div><button type="button" class="btn" data-act="saveNeed">' + esc(ta('save')) + '</button></div>' +
+        '<h3 style="margin-top:8px">' + esc(ta('dietTitle')) + '<small>' + diets.length + '</small></h3>' +
+        (diets.length ? '<ul class="plain">' + diets.map(function (g) { return '<li><b>' + esc(g.name) + '</b><span>' + esc(g.diet) + '</span></li>'; }).join('') + '</ul>' : '<p class="empty">' + esc(ta('dietNone')) + '</p>') +
+      '</section>' +
+    '</div>' +
+    '<div class="grid2">' +
+      '<section class="panel"><h3>' + esc(ta('addTitle')) + '</h3>' +
+        '<form class="addform" id="addForm"><input type="text" id="newName" placeholder="' + esc(ta('addPh')) + '" aria-label="' + esc(ta('addPh')) + '">' +
+        '<select id="newAdults" aria-label="' + esc(ta('thAdults')) + '"><option value="1">' + esc(ta('one')) + '</option><option value="2">' + esc(ta('two')) + '</option></select>' +
+        '<button type="submit" class="btn">' + esc(ta('add')) + '</button></form></section>' +
+      '<section class="panel"><h3>' + esc(ta('linkTitle')) + '</h3><div class="linkbox"><code id="gUrl">' + esc(A.data.guestUrl) + '</code>' +
+        '<button type="button" class="btn ghost" data-act="copy">' + esc(ta('copy')) + '</button></div></section>' +
+    '</div>' +
+    '<section class="panel">' +
+      '<div class="toolbar">' + ['all', 'yes', 'pending', 'no'].map(function (f) {
+        const n = f === 'all' ? gs.length : gs.filter(function (g) { return g.status === f; }).length;
+        return '<button type="button" class="tab" data-act="filter" data-v="' + f + '" aria-pressed="' + (A.filter === f) + '">' + esc(ta(f === 'pending' ? 'wait' : f)) + ' · ' + n + '</button>';
+      }).join('') + '<span class="spacer"></span><input type="search" id="aq" placeholder="' + esc(ta('search')) + '" aria-label="' + esc(ta('search')) + '" value="' + esc(A.q) + '"></div>' +
+      '<div class="tablewrap"><table><thead><tr><th>' + esc(ta('thName')) + '</th><th>' + esc(ta('thStatus')) + '</th><th>' + esc(ta('thAdults')) + '</th><th>' + esc(ta('thKids')) + '</th><th>' + esc(ta('thBring')) + '</th><th>' + esc(ta('thDiet')) + '</th><th>' + esc(ta('thUpd')) + '</th><th></th></tr></thead><tbody>' +
+        rows.map(rowHtml).join('') +
+      '</tbody></table></div>' +
+    '</section>';
+}
+function rowHtml(g) {
+  if (A.editing === g.name) {
+    const opt = function (v, l) { return '<option value="' + v + '"' + (g.status === v ? ' selected' : '') + '>' + esc(l) + '</option>'; };
+    return '<tr class="editing"><td colspan="8"><form class="editgrid" id="editForm" data-name="' + esc(g.name) + '">' +
+      '<div class="full"><b>' + esc(g.name) + '</b></div>' +
+      '<label><span class="lbl">' + esc(ta('status')) + '</span><select id="eStatus">' + opt('yes', ta('st_yes')) + opt('pending', ta('st_pending')) + opt('no', ta('st_no')) + '</select></label>' +
+      '<label><span class="lbl">' + esc(ta('thAdults')) + '</span><select id="eAdults">' + [1, 2, 3, 4, 5, 6].map(function (n) { return '<option' + (g.adults === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+      '<label><span class="lbl">' + esc(ta('thKids')) + '</span><select id="eKids">' + [0, 1, 2, 3, 4, 5, 6].map(function (n) { return '<option' + (g.kids === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+      '<label class="full"><span class="lbl">' + esc(ta('thBring')) + '</span><input type="text" id="eBring" value="' + esc(g.bring) + '"></label>' +
+      '<label class="full"><span class="lbl">' + esc(ta('thDiet')) + '</span><input type="text" id="eDiet" value="' + esc(g.diet) + '"></label>' +
+      '<div class="full" style="display:flex;gap:8px"><button type="submit" class="btn">' + esc(ta('save')) + '</button><button type="button" class="btn ghost" data-act="cancelEdit">' + esc(ta('cancel')) + '</button></div>' +
+      '</form></td></tr>';
+  }
+  return '<tr><td><b>' + esc(g.name) + '</b></td><td><span class="pill ' + g.status + '">' + esc(ta('st_' + g.status)) + '</span></td>' +
+    '<td class="num">' + g.adults + '</td><td class="num">' + (g.kids || (g.kidsRaw && g.kidsRaw !== '0' ? esc(g.kidsRaw) : '–')) + '</td>' +
+    '<td>' + esc(g.bring || '–') + '</td><td>' + esc(g.diet || '–') + '</td><td class="small muted">' + esc(fmtDate(g.updated)) + '</td>' +
+    '<td><button type="button" class="linkbtn" data-act="edit" data-name="' + esc(g.name) + '">' + esc(ta('edit')) + '</button></td></tr>';
+}
+function adminCall(fn, args, okMsg) {
+  return call.apply(null, [fn, A.key].concat(args)).then(function (r) { A.data = fixUrl(r); A.err = ''; A.editing = ''; renderAdmin(); if (okMsg) toast(okMsg); })
+    .catch(function (e) { A.err = ta('err', { m: e && e.message ? e.message : '' }); renderAdmin(); });
+}
+$('#adminView').addEventListener('click', function (e) {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'filter') { A.filter = b.dataset.v; renderAdmin(); }
+  else if (act === 'edit') { A.editing = b.dataset.name; renderAdmin(); }
+  else if (act === 'cancelEdit') { A.editing = ''; renderAdmin(); }
+  else if (act === 'saveNeed') adminCall('setNeed', [$('#need').value], ta('saved'));
+  else if (act === 'copy') {
+    const text = $('#gUrl').textContent;
+    const fallback = function () { const r = document.createRange(); r.selectNodeContents($('#gUrl')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+    try { navigator.clipboard.writeText(text).then(function () { toast(ta('copied')); }, fallback); } catch (err) { fallback(); }
+  }
+});
+$('#adminView').addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (e.target.id === 'addForm') {
+    const n = $('#newName').value.trim(); if (!n) return;
+    adminCall('addGuest', [n, $('#newAdults').value], ta('added'));
+  }
+  if (e.target.id === 'editForm') {
+    adminCall('adminUpdate', [{ name: e.target.dataset.name, status: $('#eStatus').value, adults: $('#eAdults').value, kids: $('#eKids').value, bring: $('#eBring').value, diet: $('#eDiet').value }], ta('saved'));
+  }
+});
+$('#adminView').addEventListener('input', function (e) {
+  if (e.target.id === 'aq') {
+    A.q = e.target.value; const pos = e.target.selectionStart;
+    renderAdmin(); const el = $('#aq'); el.focus(); try { el.setSelectionRange(pos, pos); } catch (x) {}
+  }
+  if (e.target.id === 'est') {
+    A.est = +e.target.value; try { localStorage.setItem('rsvp-est', A.est); } catch (x) {}
+    renderAdmin(); const el = $('#est'); if (el) el.focus();
+  }
+});
+
+/* ------------------------------------------------------------- language */
+function setLang(l) {
+  lang = l; try { localStorage.setItem('rsvp-lang', l); } catch (e) {}
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === l)); });
+  $('#demoNote').textContent = t('demoNote'); $('#demoHost').textContent = t('demoHost'); $('#demoAdmin').textContent = t('demoAdmin');
+  if (mode === 'admin') renderAdmin(); else renderGuest();
+}
+document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { setLang(b.dataset.lang); }); });
+
+/* ------------------------------------------------------------- graphics */
+function drawGarland() {
+  const c = $('#garland'); if (!c || $('#guestView').hidden) return;
+  const r = c.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+  if (!r.width) return;
+  c.width = r.width * dpr; c.height = r.height * dpr;
+  const x = c.getContext('2d'); x.scale(dpr, dpr);
+  const W = r.width, sag = 14, y0 = 16;
+  const curve = function (u) { return y0 + Math.sin(u * Math.PI) * sag; };
+  let seed = 7; const rnd = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  const greens = ['#1d4a36', '#2c5f43', '#3c7552', '#567f5a', '#24533c'];
+  x.lineCap = 'round';
+  for (let i = 0; i < 900; i++) {
+    const u = rnd(); const px = u * W, py = curve(u) + (rnd() - .5) * 12;
+    const ang = (rnd() - .5) * Math.PI * 1.6 + (rnd() < .5 ? 0 : Math.PI);
+    const len = 7 + rnd() * 9;
+    x.strokeStyle = greens[(rnd() * greens.length) | 0]; x.lineWidth = 1.4;
+    x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(ang) * len, py + Math.sin(ang) * len * .7); x.stroke();
+  }
+  // bow in the middle
+  const bx = W / 2, by = curve(.5) - 2;
+  x.fillStyle = '#a3203a';
+  x.beginPath(); x.ellipse(bx - 13, by, 13, 7, -.35, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.ellipse(bx + 13, by, 13, 7, .35, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.moveTo(bx - 3, by + 2); x.quadraticCurveTo(bx - 14, by + 22, bx - 20, by + 30); x.lineTo(bx - 14, by + 31); x.quadraticCurveTo(bx - 6, by + 20, bx + 1, by + 4); x.fill();
+  x.beginPath(); x.moveTo(bx + 3, by + 2); x.quadraticCurveTo(bx + 14, by + 22, bx + 20, by + 30); x.lineTo(bx + 14, by + 31); x.quadraticCurveTo(bx + 6, by + 20, bx - 1, by + 4); x.fill();
+  x.fillStyle = '#7d1529'; x.beginPath(); x.arc(bx, by + 1, 5, 0, Math.PI * 2); x.fill();
+  // berries
+  for (let i = 0; i < 16; i++) {
+    const u = .04 + rnd() * .92; if (Math.abs(u - .5) < .06) continue;
+    x.fillStyle = rnd() < .75 ? '#b3253f' : '#c9a14a';
+    x.beginPath(); x.arc(u * W, curve(u) + (rnd() - .5) * 8, 2.6 + rnd() * 1.4, 0, Math.PI * 2); x.fill();
+  }
+}
+function snow() {
+  const c = $('#snow'); const x = c.getContext('2d');
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, flakes = [];
+  const size = function () {
+    const dpr = window.devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+    c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    flakes = Array.from({ length: Math.round(W * H / 9000) }, function () { return { x: Math.random() * W, y: Math.random() * H, r: .6 + Math.random() * 2.2, s: .25 + Math.random() * .7, d: Math.random() * 6.28 }; });
+    if (reduce) frame();
+  };
+  const frame = function () {
+    x.clearRect(0, 0, W, H); x.fillStyle = 'rgba(255,255,255,.75)';
+    flakes.forEach(function (f) {
+      if (!reduce) { f.y += f.s; f.d += .01; f.x += Math.sin(f.d) * .3; if (f.y > H + 4) { f.y = -4; f.x = Math.random() * W; } }
+      x.globalAlpha = .35 + f.r / 4; x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.283); x.fill();
+    });
+    x.globalAlpha = 1;
+    if (!reduce) requestAnimationFrame(frame);
+  };
+  addEventListener('resize', function () { size(); drawGarland(); });
+  size(); if (!reduce) requestAnimationFrame(frame);
+}
+
+/* ----------------------------------------------------------------- boot */
+let mode = 'guest';
+function show(m) {
+  mode = m;
+  $('#guestView').hidden = m !== 'guest';
+  $('#adminView').hidden = m !== 'admin';
+  $('#wrap').classList.toggle('wide', m === 'admin');
+  $('#demoHost').setAttribute('aria-current', m === 'guest' ? 'page' : 'false');
+  $('#demoAdmin').setAttribute('aria-current', m === 'admin' ? 'page' : 'false');
+  if (m === 'admin') { if (!A.data) { renderAdmin(); loadAdmin(); } else renderAdmin(); }
+  else { renderGuest(); if (!G.guests) loadPublic(); }
+}
+setLang(lang);
+snow();
+if (API_URL) {
+  let k = null; try { k = new URLSearchParams(location.search).get('admin'); } catch (e) {}
+  if (k) { A.key = k; show('admin'); } else show('guest');
+} else if (LIVE) {
+  google.script.url.getLocation(function (loc) {
+    const k = loc && loc.parameter && loc.parameter.admin;
+    if (k) { A.key = k; show('admin'); } else show('guest');
+  });
+} else {
+  $('#demo').hidden = false;
+  A.key = 'demo';
+  const route = function () { show(location.hash === '#admin' ? 'admin' : 'guest'); };
+  addEventListener('hashchange', route);
+  route();
+}
+})();
+</script>
+</body>
+</html>

@@ -200,6 +200,20 @@ td.num { font-variant-numeric: tabular-nums; text-align: center; }
 tr.editing td { background: #fbf3e4; }
 .editgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .editgrid .full { grid-column: 1 / -1; }
+.funnel-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 760px) { .funnel-grid { grid-template-columns: 1fr; } }
+.funnel { display: grid; gap: 10px; }
+.frow { display: grid; justify-items: center; gap: 4px; }
+.fbar { box-sizing: border-box; min-width: 10rem; max-width: 100%; display: flex; align-items: baseline; justify-content: center; gap: 10px; padding: 12px 18px; border-radius: 10px; color: var(--berry-ink); clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%); }
+.fbar b { font: 600 30px/1 var(--f-head); font-variant-numeric: tabular-nums; }
+.fbar span { font-size: 13px; }
+.fbar.f1 { background: var(--pine); }
+.fbar.f2 { background: var(--moss); }
+.fbar.f3 { background: var(--berry); }
+.fnote { font-size: 12.5px; color: var(--ink-soft); }
+.est-n { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.est-n .n { font: 600 48px/1 var(--f-head); font-variant-numeric: tabular-nums; }
+.panel input[type="range"] { width: 100%; accent-color: var(--berry); }
 .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: 14px; z-index: 20; }
 
 @media (max-width: 480px) {
@@ -340,9 +354,9 @@ const I18N = {
 const A18N = {
   cs: {
     title: 'Přehled hostů', sub: 'Do večírku zbývá {d} dní · sobota 19. 12. v 18:00',
-    confirmed: 'lidí potvrzeno', kidsOf: 'z toho {k} dětí', declined: 'odpovědí nepřijde',
-    pending: 'čeká na odpověď', estimate: 'odhad celkem', estHint: '{p} % z neodpovězených řekne ano',
-    maxPossible: 'max. možný počet', invited: 'pozvaných (záznamů)',
+    confirmed: 'lidí potvrzeno', kidsOf: 'z toho {k} dětí', declined: 'lidí nepřijde', invCount: '{n} pozvánek',
+    pending: 'lidí čeká na odpověď', estimate: 'odhad celkem', estHint: '{p} % z neodpovězených řekne ano',
+    maxPossible: 'max. možný počet', invited: 'pozvaných celkem',
     bringTitle: 'Kdo co nese', bringNone: 'Zatím nikdo nic nenapsal.',
     needTitle: 'Co ještě chybí', needHint: 'Uvidí to hosté v kroku „Co donesete“.', needPh: 'Např. nealko, chleba, něco sladkého bez lepku', save: 'Uložit',
     dietTitle: 'Alergie a diety', dietNone: 'Nikdo nic nehlásí.',
@@ -353,13 +367,15 @@ const A18N = {
     thName: 'Jméno', thStatus: 'Stav', thAdults: 'Dosp.', thKids: 'Děti', thBring: 'Donese', thDiet: 'Dieta', thUpd: 'Změna',
     edit: 'Upravit', cancel: 'Zrušit', status: 'Stav', saved: 'Uloženo', added: 'Host přidán',
     st_yes: 'přijde', st_no: 'nepřijde', st_pending: 'čekáme',
-    err: 'Něco se nepovedlo: {m}', loading: 'Načítám…', badKey: 'Neplatný odkaz do adminu.'
+    err: 'Něco se nepovedlo: {m}', loading: 'Načítám…', badKey: 'Neplatný odkaz do adminu.',
+    funnelTitle: 'Kolik nás bude', fInvited: 'pozvaných', fReplied: 'odpovědělo', fRepliedNote: '{no} z nich nepřijde', fYes: 'přijde',
+    estRange: 'jistě {min}, nejvýš {max}', waitNote: '{p} lidí ({n} pozvánek) zatím neodpovědělo.'
   },
   en: {
     title: 'Guest overview', sub: '{d} days to go · Saturday 19 Dec at 6 pm',
-    confirmed: 'people confirmed', kidsOf: 'incl. {k} kids', declined: 'replies not coming',
-    pending: 'awaiting reply', estimate: 'estimated total', estHint: '{p} % of non-replies say yes',
-    maxPossible: 'max. possible', invited: 'invited (entries)',
+    confirmed: 'people confirmed', kidsOf: 'incl. {k} kids', declined: 'people not coming', invCount: '{n} invitations',
+    pending: 'people awaiting reply', estimate: 'estimated total', estHint: '{p} % of non-replies say yes',
+    maxPossible: 'max. possible', invited: 'invited in total',
     bringTitle: 'Who brings what', bringNone: 'Nobody has written anything yet.',
     needTitle: 'Still missing', needHint: 'Guests see this in the “What will you bring” step.', needPh: 'E.g. soft drinks, bread, a gluten-free dessert', save: 'Save',
     dietTitle: 'Allergies and diets', dietNone: 'Nobody reported anything.',
@@ -370,7 +386,9 @@ const A18N = {
     thName: 'Name', thStatus: 'Status', thAdults: 'Adults', thKids: 'Kids', thBring: 'Bringing', thDiet: 'Diet', thUpd: 'Updated',
     edit: 'Edit', cancel: 'Cancel', status: 'Status', saved: 'Saved', added: 'Guest added',
     st_yes: 'coming', st_no: 'not coming', st_pending: 'waiting',
-    err: 'Something went wrong: {m}', loading: 'Loading…', badKey: 'Invalid admin link.'
+    err: 'Something went wrong: {m}', loading: 'Loading…', badKey: 'Invalid admin link.',
+    funnelTitle: 'Headcount', fInvited: 'invited', fReplied: 'replied', fRepliedNote: '{no} of them not coming', fYes: 'coming',
+    estRange: 'sure {min}, at most {max}', waitNote: '{p} people ({n} invitations) have not replied yet.'
   }
 };
 
@@ -644,6 +662,7 @@ function renderAdmin() {
   const sum = function (arr, f) { return arr.reduce(function (s, g) { return s + f(g); }, 0); };
   const yesPeople = sum(yes, people), yesKids = sum(yes, function (g) { return g.kids || 0; });
   const waitPeople = sum(wait, people);
+  const noPeople = sum(no, people), totalPeople = sum(gs, people), repliedPeople = yesPeople + noPeople;
   const est = yesPeople + Math.round(waitPeople * A.est / 100);
   const brings = yes.concat(wait).filter(function (g) { return g.bring; });
   const diets = gs.filter(function (g) { return g.diet && g.status !== 'no'; });
@@ -656,13 +675,18 @@ function renderAdmin() {
   host.innerHTML =
     '<div class="adm-head"><div><p class="script">Christmas Party</p><h1>' + esc(ta('title')) + '</h1><p>' + esc(ta('sub', { d: daysLeft() })) + '</p></div></div>' +
     (A.err ? '<div class="panel" style="margin-bottom:16px"><p class="err">' + esc(A.err) + '</p></div>' : '') +
-    '<div class="stats">' +
-      '<div class="stat hero"><span class="n">' + yesPeople + '</span><span class="l">' + esc(ta('confirmed')) + '<br>' + esc(ta('kidsOf', { k: yesKids })) + '</span></div>' +
-      '<div class="stat"><span class="n">' + est + '</span><span class="l">' + esc(ta('estimate')) + '</span>' +
-        '<input type="range" id="est" min="0" max="100" step="5" value="' + A.est + '" aria-label="' + esc(ta('estHint', { p: A.est })) + '"><span class="l small" id="estLbl">' + esc(ta('estHint', { p: A.est })) + '</span></div>' +
-      '<div class="stat"><span class="n">' + wait.length + '</span><span class="l">' + esc(ta('pending')) + ' (' + waitPeople + ' os.)</span></div>' +
-      '<div class="stat"><span class="n">' + no.length + '</span><span class="l">' + esc(ta('declined')) + '</span></div>' +
-      '<div class="stat"><span class="n">' + (yesPeople + waitPeople) + '</span><span class="l">' + esc(ta('maxPossible')) + '<br>' + gs.length + ' ' + esc(ta('invited')) + '</span></div>' +
+    '<div class="funnel-grid">' +
+      '<section class="panel"><h3>' + esc(ta('funnelTitle')) + '</h3><div class="funnel">' +
+        funnelRow(ta('fInvited'), totalPeople, totalPeople, 'f1', ta('invCount', { n: gs.length })) +
+        funnelRow(ta('fReplied'), repliedPeople, totalPeople, 'f2', ta('fRepliedNote', { no: noPeople })) +
+        funnelRow(ta('fYes'), yesPeople, totalPeople, 'f3', ta('kidsOf', { k: yesKids })) +
+      '</div></section>' +
+      '<section class="panel"><h3>' + esc(ta('estimate')) + '</h3>' +
+        '<div class="est-n"><span class="n">' + est + '</span><span class="muted small">' + esc(ta('estRange', { min: yesPeople, max: yesPeople + waitPeople })) + '</span></div>' +
+        '<input type="range" id="est" min="0" max="100" step="5" value="' + A.est + '" aria-label="' + esc(ta('estHint', { p: A.est })) + '">' +
+        '<span class="muted small">' + esc(ta('estHint', { p: A.est })) + '</span>' +
+        '<p class="muted small">' + esc(ta('waitNote', { p: waitPeople, n: wait.length })) + '</p>' +
+      '</section>' +
     '</div>' +
     '<div class="grid2">' +
       '<section class="panel"><h3>' + esc(ta('bringTitle')) + '<small>' + brings.length + '</small></h3>' +
@@ -685,13 +709,17 @@ function renderAdmin() {
     '</div>' +
     '<section class="panel">' +
       '<div class="toolbar">' + ['all', 'yes', 'pending', 'no'].map(function (f) {
-        const n = f === 'all' ? gs.length : gs.filter(function (g) { return g.status === f; }).length;
+        const n = sum(f === 'all' ? gs : gs.filter(function (g) { return g.status === f; }), people);
         return '<button type="button" class="tab" data-act="filter" data-v="' + f + '" aria-pressed="' + (A.filter === f) + '">' + esc(ta(f === 'pending' ? 'wait' : f)) + ' · ' + n + '</button>';
       }).join('') + '<span class="spacer"></span><input type="search" id="aq" placeholder="' + esc(ta('search')) + '" aria-label="' + esc(ta('search')) + '" value="' + esc(A.q) + '"></div>' +
       '<div class="tablewrap"><table><thead><tr><th>' + esc(ta('thName')) + '</th><th>' + esc(ta('thStatus')) + '</th><th>' + esc(ta('thAdults')) + '</th><th>' + esc(ta('thKids')) + '</th><th>' + esc(ta('thBring')) + '</th><th>' + esc(ta('thDiet')) + '</th><th>' + esc(ta('thUpd')) + '</th><th></th></tr></thead><tbody>' +
         rows.map(rowHtml).join('') +
       '</tbody></table></div>' +
     '</section>';
+}
+function funnelRow(label, n, max, cls, note) {
+  const w = max ? Math.max(18, Math.round(n / max * 100)) : 18;
+  return '<div class="frow"><div class="fbar ' + cls + '" style="width:' + w + '%"><b>' + n + '</b><span>' + esc(label) + '</span></div><div class="fnote">' + esc(note) + '</div></div>';
 }
 function rowHtml(g) {
   if (A.editing === g.name) {

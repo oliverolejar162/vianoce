@@ -141,6 +141,8 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-
 .others { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding-block: 12px; display: grid; gap: 8px; max-height: 230px; overflow-y: auto; }
 .others .row { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); gap: 12px; font-size: 14px; }
 .others .row b { font-weight: 600; }
+.bitem { font-size: 14px; padding-left: 14px; position: relative; }
+.bitem::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--berry); }
 .need { background: #fbf1d7; border: 1px solid #ead7a4; border-radius: 12px; padding: 12px 14px; font-size: 14px; }
 
 .summary { display: grid; gap: 0; border-top: 1px solid var(--line); }
@@ -202,18 +204,20 @@ tr.editing td { background: #fbf3e4; }
 .editgrid .full { grid-column: 1 / -1; }
 .funnel-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
 @media (max-width: 760px) { .funnel-grid { grid-template-columns: 1fr; } }
-.funnel { display: grid; gap: 10px; }
-.frow { display: grid; justify-items: center; gap: 4px; }
-.fpair { display: flex; justify-content: center; gap: 8px; width: 100%; }
-.fbar { box-sizing: border-box; min-width: 6.5rem; max-width: 100%; display: flex; align-items: baseline; justify-content: center; gap: 10px; padding: 12px 18px; border-radius: 10px; color: var(--berry-ink); clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%); }
-.fbar b { font: 600 30px/1 var(--f-head); font-variant-numeric: tabular-nums; }
-.fbar span { font-size: 13px; }
-.fbar.f-inv { background: var(--pine); }
-.fbar.f-rep { background: #5c6b64; }
-.fbar.f-wait { background: var(--gold); color: var(--ink); }
-.fbar.f-yes { background: #2f6b3a; }
-.fbar.f-no { background: var(--berry); }
-.fnote { font-size: 12.5px; color: var(--ink-soft); }
+.funnel { display: flex; }
+.inode { display: flex; flex-direction: column; gap: 6px; min-width: 4.6rem; }
+.ikids { display: flex; gap: 6px; }
+.iblk { box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; color: var(--berry-ink); min-height: 64px; overflow: hidden; }
+.iblk b { font: 600 28px/1 var(--f-head); font-variant-numeric: tabular-nums; }
+.iblk span { font-size: 12.5px; line-height: 1.3; }
+.iblk small { font-size: 11.5px; opacity: .8; }
+.iblk.f-inv { background: var(--pine); }
+.iblk.f-rep { background: #5c6b64; }
+.iblk.f-wait { background: var(--gold); color: var(--ink); }
+.iblk.f-yes { background: #2f6b3a; }
+.iblk.f-no { background: var(--berry); }
+.iblk.f-adult { background: #4f8a58; }
+.iblk.f-kid { background: #86b07a; color: var(--ink); }
 .est-n { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .est-n .n { font: 600 48px/1 var(--f-head); font-variant-numeric: tabular-nums; }
 .panel input[type="range"] { width: 100%; accent-color: var(--berry); }
@@ -371,7 +375,7 @@ const A18N = {
     edit: 'Upravit', cancel: 'Zrušit', status: 'Stav', saved: 'Uloženo', added: 'Host přidán',
     st_yes: 'přijde', st_no: 'nepřijde', st_pending: 'čekáme',
     err: 'Něco se nepovedlo: {m}', loading: 'Načítám…', badKey: 'Neplatný odkaz do adminu.',
-    funnelTitle: 'Kolik nás bude', fInvited: 'pozvaných', fReplied: 'odpovědělo', fRepliedNote: '{no} z nich nepřijde', fYes: 'přijde', fWaiting: 'neodpovědělo', fNo: 'nepřijde', adultsKids: '{a} dospělých · {k} dětí',
+    funnelTitle: 'Kolik nás bude', fInvited: 'pozvaných', fReplied: 'odpovědělo', fRepliedNote: '{no} z nich nepřijde', fYes: 'přijde', fAdults: 'dospělí', fKids: 'děti', fWaiting: 'neodpovědělo', fNo: 'nepřijde', adultsKids: '{a} dospělých · {k} dětí',
     estRange: 'jistě {min}, nejvýš {max}', waitNote: '{p} lidí ({n} pozvánek) zatím neodpovědělo.',
     inviteTitle: 'Text pozvánky (můžete upravit)', copyText: 'Kopírovat text',
     inviteLines: ['Ahoj! 🎄', '', 'Zveme vás na naši vánoční party v sobotu 19. prosince od 18:00, Wittgensteinova 1217/2B, Olomouc.', '', 'Letos žádné dárky. Stačí jedna vánoční koule na stromeček za každého a něco dobrého k jídlu nebo k pití, ideálně něco tradičního od vás z domova.', '', 'Moc prosíme, dejte nám přes tenhle odkaz vědět, jestli dorazíte, nebo ne. Hodně nám to pomůže s plánováním:', '{url}', '', 'Těšíme se na vás!', 'Oliver & Maťka']
@@ -392,7 +396,7 @@ const A18N = {
     edit: 'Edit', cancel: 'Cancel', status: 'Status', saved: 'Saved', added: 'Guest added',
     st_yes: 'coming', st_no: 'not coming', st_pending: 'waiting',
     err: 'Something went wrong: {m}', loading: 'Loading…', badKey: 'Invalid admin link.',
-    funnelTitle: 'Headcount', fInvited: 'invited', fReplied: 'replied', fRepliedNote: '{no} of them not coming', fYes: 'coming', fWaiting: 'no reply yet', fNo: 'not coming', adultsKids: '{a} adults · {k} kids',
+    funnelTitle: 'Headcount', fInvited: 'invited', fReplied: 'replied', fRepliedNote: '{no} of them not coming', fYes: 'coming', fAdults: 'adults', fKids: 'kids', fWaiting: 'no reply yet', fNo: 'not coming', adultsKids: '{a} adults · {k} kids',
     estRange: 'sure {min}, at most {max}', waitNote: '{p} people ({n} invitations) have not replied yet.',
     inviteTitle: 'Invitation text (you can edit it)', copyText: 'Copy text',
     inviteLines: ['Hi! 🎄', '', 'We are inviting you to our Christmas party on Saturday 19 December from 6 pm, Wittgensteinova 1217/2B, Olomouc.', '', 'No presents this year. Just bring one Christmas bauble for the tree per person and something good to eat or drink, ideally a traditional dish from home.', '', 'Please let us know through this link whether you can make it or not. It really helps us plan:', '{url}', '', 'Looking forward to seeing you!', 'Oliver & Maťka']
@@ -411,7 +415,7 @@ const Demo = (function () {
   let need = '';
   const copy = function (x) { return JSON.parse(JSON.stringify(x)); };
   const find = function (n) { const g = rows.find(function (r) { return r.name === n; }); if (!g) throw new Error('Jméno v seznamu není.'); return g; };
-  const pub = function () { return copy({ guests: rows.map(function (g) { return { name: g.name, status: g.status, adults: g.adults, kids: g.kids, bring: g.status === 'no' ? '' : g.bring }; }), need: need }); };
+  const pub = function () { return copy({ guests: rows.map(function (g) { return { name: g.name, adults: g.adults }; }), bring: rows.filter(function (g) { return g.status !== 'no' && g.bring; }).map(function (g) { return g.bring; }), need: need }); };
   const adm = function () { return copy({ guests: rows, need: need, guestUrl: 'https://script.google.com/macros/s/…/exec' }); };
   const write = function (p) { const g = find(p.name); Object.assign(g, { status: p.status, adults: +p.adults || 1, kids: +p.kids || 0, kidsRaw: (+p.kids || '') + '', bring: p.bring || '', diet: p.diet || '', updated: new Date().toISOString() }); };
   return {
@@ -471,7 +475,7 @@ const G = { step: 'invite', guests: null, need: '', q: '', me: '', prev: null, e
   d: { status: '', adults: 1, kids: 0, bring: '', diet: '' } };
 
 function loadPublic() {
-  return call('getPublicData').then(function (r) { G.guests = r.guests; G.need = r.need; if (G.step === 'who' || G.step === 'bring') renderGuest(); })
+  return call('getPublicData').then(function (r) { G.guests = r.guests; G.bring = r.bring || []; G.need = r.need; if (G.step === 'who' || G.step === 'bring') renderGuest(); })
     .catch(function () { G.guests = G.guests || []; });
 }
 function go(step) { G.err = ''; G.step = step; renderGuest(); const c = $('.card'); if (c && c.getBoundingClientRect().top < 0) c.scrollIntoView({ behavior: 'smooth' }); }
@@ -492,7 +496,7 @@ function nameListHtml() {
   if (!list.length) return '<p class="muted">' + esc(t('whoNone')) + '</p>';
   return list.map(function (g) {
     return '<button type="button" class="name-btn" data-act="pick" data-name="' + esc(g.name) + '" aria-pressed="' + (g.name === G.me) + '"><span>' + esc(g.name) + '</span>' +
-      (g.status !== 'pending' ? '<span class="pill ' + g.status + '">' + esc(t('st_' + g.status)) + '</span>' : '') + '</button>';
+      '</button>';
   }).join('');
 }
 
@@ -530,12 +534,13 @@ function stepHtml() {
       '<p class="eyebrow">' + esc(t('countEyebrow')) + '</p><h2>' + esc(t('countTitle')) + '</h2>' +
       counterHtml('adults', d.adults) + counterHtml('kids', d.kids) + navHtml() + '</div>';
     case 'bring': {
-      const others = (G.guests || []).filter(function (g) { return g.name !== G.me && g.bring && g.status !== 'no'; });
+      const mine = G.prev && G.prev.bring;
+      const others = (G.bring || []).filter(function (b) { return b && b !== mine; });
       return '<div class="step">' +
         '<p class="eyebrow">' + esc(t('bringEyebrow')) + '</p><h2>' + esc(t('bringTitle')) + '</h2>' +
         '<p class="muted">' + esc(t('bringText')) + '</p>' +
         '<div><h3 style="margin-bottom:8px">' + esc(t('bringOthers')) + '</h3><div class="others">' +
-          (others.length ? others.map(function (g) { return '<div class="row"><b>' + esc(g.name) + '</b><span>' + esc(g.bring) + '</span></div>'; }).join('') : '<p class="muted small">' + esc(t('bringNobody')) + '</p>') +
+          (others.length ? others.map(function (b) { return '<div class="bitem">' + esc(b) + '</div>'; }).join('') : '<p class="muted small">' + esc(t('bringNobody')) + '</p>') +
         '</div></div>' +
         (G.need ? '<div class="need"><b>' + esc(t('bringNeed')) + '</b> ' + esc(G.need) + '</div>' : '') +
         '<div><label class="lbl" for="bring">' + esc(t('bringLabel')) + '</label><textarea id="bring" placeholder="' + esc(t('bringPh')) + '">' + esc(d.bring) + '</textarea></div>' +
@@ -620,7 +625,7 @@ function send() {
   G.sending = true; G.err = ''; renderGuest();
   const d = G.d;
   call('submitRsvp', { name: G.me, status: d.status, adults: d.adults, kids: d.status === 'yes' ? d.kids : 0, bring: d.status === 'yes' ? d.bring : '', diet: d.status === 'yes' ? d.diet : '' })
-    .then(function (r) { G.sending = false; G.guests = r.guests; G.need = r.need; go('done'); })
+    .then(function (r) { G.sending = false; G.guests = r.guests; G.bring = r.bring || []; G.need = r.need; go('done'); })
     .catch(function () { G.sending = false; G.err = t('sendErr'); renderGuest(); });
 }
 
@@ -684,9 +689,16 @@ function renderAdmin() {
     (A.err ? '<div class="panel" style="margin-bottom:16px"><p class="err">' + esc(A.err) + '</p></div>' : '') +
     '<div class="funnel-grid">' +
       '<section class="panel"><h3>' + esc(ta('funnelTitle')) + '</h3><div class="funnel">' +
-        funnelRow([fseg(ta('fInvited'), totalPeople, totalPeople, 'f-inv')], ta('invCount', { n: gs.length })) +
-        funnelRow([fseg(ta('fReplied'), repliedPeople, totalPeople, 'f-rep'), fseg(ta('fWaiting'), waitPeople, totalPeople, 'f-wait')], '') +
-        funnelRow([fseg(ta('fYes'), yesPeople, totalPeople, 'f-yes'), fseg(ta('fNo'), noPeople, totalPeople, 'f-no')], ta('adultsKids', { a: yesPeople - yesKids, k: yesKids })) +
+        inode(ta('fInvited'), totalPeople, 'f-inv', ta('invCount', { n: gs.length }), [
+          inode(ta('fReplied'), repliedPeople, 'f-rep', '', [
+            inode(ta('fYes'), yesPeople, 'f-yes', '', [
+              inode(ta('fAdults'), yesPeople - yesKids, 'f-adult', '', null),
+              inode(ta('fKids'), yesKids, 'f-kid', '', null)
+            ]),
+            inode(ta('fNo'), noPeople, 'f-no', '', null)
+          ]),
+          inode(ta('fWaiting'), waitPeople, 'f-wait', ta('invCount', { n: wait.length }), null)
+        ]) +
       '</div></section>' +
       '<section class="panel"><h3>' + esc(ta('estimate')) + '</h3>' +
         '<div class="est-n"><span class="n">' + est + '</span><span class="muted small">' + esc(ta('estRange', { min: yesPeople, max: yesPeople + waitPeople })) + '</span></div>' +
@@ -727,12 +739,10 @@ function renderAdmin() {
       '</tbody></table></div>' +
     '</section>';
 }
-function fseg(label, n, total, cls) {
-  const w = total ? Math.max(8, Math.round(n / total * 100)) : 8;
-  return '<div class="fbar ' + cls + '" style="flex:0 1 ' + w + '%"><b>' + n + '</b><span>' + esc(label) + '</span></div>';
-}
-function funnelRow(segs, note) {
-  return '<div class="frow"><div class="fpair">' + segs.join('') + '</div>' + (note ? '<div class="fnote">' + esc(note) + '</div>' : '') + '</div>';
+function inode(label, n, cls, sub, kids) {
+  return '<div class="inode" style="flex:' + Math.max(n, 0.001) + ' 1 0">' +
+    '<div class="iblk ' + cls + '"><b>' + n + '</b><span>' + esc(label) + '</span>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div>' +
+    (kids ? '<div class="ikids">' + kids.join('') + '</div>' : '') + '</div>';
 }
 function rowHtml(g) {
   if (A.editing === g.name) {

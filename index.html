@@ -204,12 +204,15 @@ tr.editing td { background: #fbf3e4; }
 @media (max-width: 760px) { .funnel-grid { grid-template-columns: 1fr; } }
 .funnel { display: grid; gap: 10px; }
 .frow { display: grid; justify-items: center; gap: 4px; }
-.fbar { box-sizing: border-box; min-width: 7.5rem; max-width: 100%; display: flex; align-items: baseline; justify-content: center; gap: 10px; padding: 12px 18px; border-radius: 10px; color: var(--berry-ink); clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%); }
+.fpair { display: flex; justify-content: center; gap: 8px; width: 100%; }
+.fbar { box-sizing: border-box; min-width: 6.5rem; max-width: 100%; display: flex; align-items: baseline; justify-content: center; gap: 10px; padding: 12px 18px; border-radius: 10px; color: var(--berry-ink); clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%); }
 .fbar b { font: 600 30px/1 var(--f-head); font-variant-numeric: tabular-nums; }
 .fbar span { font-size: 13px; }
-.fbar.f1 { background: var(--pine); }
-.fbar.f2 { background: var(--moss); }
-.fbar.f3 { background: var(--berry); }
+.fbar.f-inv { background: var(--pine); }
+.fbar.f-rep { background: #5c6b64; }
+.fbar.f-wait { background: var(--gold); color: var(--ink); }
+.fbar.f-yes { background: #2f6b3a; }
+.fbar.f-no { background: var(--berry); }
 .fnote { font-size: 12.5px; color: var(--ink-soft); }
 .est-n { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .est-n .n { font: 600 48px/1 var(--f-head); font-variant-numeric: tabular-nums; }
@@ -368,7 +371,7 @@ const A18N = {
     edit: 'Upravit', cancel: 'Zrušit', status: 'Stav', saved: 'Uloženo', added: 'Host přidán',
     st_yes: 'přijde', st_no: 'nepřijde', st_pending: 'čekáme',
     err: 'Něco se nepovedlo: {m}', loading: 'Načítám…', badKey: 'Neplatný odkaz do adminu.',
-    funnelTitle: 'Kolik nás bude', fInvited: 'pozvaných', fReplied: 'odpovědělo', fRepliedNote: '{no} z nich nepřijde', fYes: 'přijde',
+    funnelTitle: 'Kolik nás bude', fInvited: 'pozvaných', fReplied: 'odpovědělo', fRepliedNote: '{no} z nich nepřijde', fYes: 'přijde', fWaiting: 'neodpovědělo', fNo: 'nepřijde', adultsKids: '{a} dospělých · {k} dětí',
     estRange: 'jistě {min}, nejvýš {max}', waitNote: '{p} lidí ({n} pozvánek) zatím neodpovědělo.'
   },
   en: {
@@ -387,7 +390,7 @@ const A18N = {
     edit: 'Edit', cancel: 'Cancel', status: 'Status', saved: 'Saved', added: 'Guest added',
     st_yes: 'coming', st_no: 'not coming', st_pending: 'waiting',
     err: 'Something went wrong: {m}', loading: 'Loading…', badKey: 'Invalid admin link.',
-    funnelTitle: 'Headcount', fInvited: 'invited', fReplied: 'replied', fRepliedNote: '{no} of them not coming', fYes: 'coming',
+    funnelTitle: 'Headcount', fInvited: 'invited', fReplied: 'replied', fRepliedNote: '{no} of them not coming', fYes: 'coming', fWaiting: 'no reply yet', fNo: 'not coming', adultsKids: '{a} adults · {k} kids',
     estRange: 'sure {min}, at most {max}', waitNote: '{p} people ({n} invitations) have not replied yet.'
   }
 };
@@ -677,9 +680,9 @@ function renderAdmin() {
     (A.err ? '<div class="panel" style="margin-bottom:16px"><p class="err">' + esc(A.err) + '</p></div>' : '') +
     '<div class="funnel-grid">' +
       '<section class="panel"><h3>' + esc(ta('funnelTitle')) + '</h3><div class="funnel">' +
-        funnelRow(ta('fInvited'), totalPeople, totalPeople, 'f1', ta('invCount', { n: gs.length })) +
-        funnelRow(ta('fReplied'), repliedPeople, totalPeople, 'f2', ta('fRepliedNote', { no: noPeople })) +
-        funnelRow(ta('fYes'), yesPeople, totalPeople, 'f3', ta('kidsOf', { k: yesKids })) +
+        funnelRow([fseg(ta('fInvited'), totalPeople, totalPeople, 'f-inv')], ta('invCount', { n: gs.length })) +
+        funnelRow([fseg(ta('fReplied'), repliedPeople, totalPeople, 'f-rep'), fseg(ta('fWaiting'), waitPeople, totalPeople, 'f-wait')], '') +
+        funnelRow([fseg(ta('fYes'), yesPeople, totalPeople, 'f-yes'), fseg(ta('fNo'), noPeople, totalPeople, 'f-no')], ta('adultsKids', { a: yesPeople - yesKids, k: yesKids })) +
       '</div></section>' +
       '<section class="panel"><h3>' + esc(ta('estimate')) + '</h3>' +
         '<div class="est-n"><span class="n">' + est + '</span><span class="muted small">' + esc(ta('estRange', { min: yesPeople, max: yesPeople + waitPeople })) + '</span></div>' +
@@ -717,9 +720,12 @@ function renderAdmin() {
       '</tbody></table></div>' +
     '</section>';
 }
-function funnelRow(label, n, max, cls, note) {
-  const w = max ? Math.max(18, Math.round(n / max * 100)) : 18;
-  return '<div class="frow"><div class="fbar ' + cls + '" style="width:' + w + '%"><b>' + n + '</b><span>' + esc(label) + '</span></div><div class="fnote">' + esc(note) + '</div></div>';
+function fseg(label, n, total, cls) {
+  const w = total ? Math.max(8, Math.round(n / total * 100)) : 8;
+  return '<div class="fbar ' + cls + '" style="flex:0 1 ' + w + '%"><b>' + n + '</b><span>' + esc(label) + '</span></div>';
+}
+function funnelRow(segs, note) {
+  return '<div class="frow"><div class="fpair">' + segs.join('') + '</div>' + (note ? '<div class="fnote">' + esc(note) + '</div>' : '') + '</div>';
 }
 function rowHtml(g) {
   if (A.editing === g.name) {

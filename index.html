@@ -218,6 +218,14 @@ tr.editing td { background: #fbf3e4; }
 .iblk.f-no { background: var(--berry); }
 .iblk.f-adult { background: #4f8a58; }
 .iblk.f-kid { background: #86b07a; color: var(--ink); }
+@media (max-width: 600px) {
+  .funnel, .ikids { flex-direction: column; }
+  .inode { flex: none !important; }
+  .ikids { margin-left: 8px; padding-left: 12px; border-left: 2px solid var(--line); }
+  .iblk { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 8px; min-height: 0; min-width: 0; padding: 10px 14px; }
+  .iblk b { font-size: 24px; }
+  .iblk small { flex-basis: 100%; }
+}
 .est-n { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .est-n .n { font: 600 48px/1 var(--f-head); font-variant-numeric: tabular-nums; }
 .panel input[type="range"] { width: 100%; accent-color: var(--berry); }
